@@ -5,12 +5,14 @@
            [java.awt Color Dimension]
            [java.awt.image BufferedImage]))
 
+(load-file "map1.clj")
+
 (defn render-board [in-graphics w h]
-  (let [images ["G000M800.BMP" "G000M801.BMP" "G000M802.BMP" "G000M803.BMP"]]
-    (doseq [x (range (/ (+ w 128) 128))
-            y (range (/ (+ h 128) 128))]
-      (doto in-graphics
-        (.drawImage (ImageIO/read (File. (nth images (rand-int 4)))) (* x 128) (* y 128) nil)))))
+  (let [map (map1/get-map)]
+    (doseq [x (range 4)
+            y (range 6)]
+      (let [image (ImageIO/read (File. (nth (nth map y) x)))]
+        (.drawImage in-graphics image (* x 128) (* y 128) nil)))))
 
 (defn render [g in-panel]
   (let [w (.getWidth in-panel)
