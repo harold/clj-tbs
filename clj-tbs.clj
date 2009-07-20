@@ -11,7 +11,7 @@
   (let [map (map1/get-map)]
     (doseq [x (range 4)
             y (range 6)]
-      (let [image (ImageIO/read (File. (nth (nth map y) x)))]
+      (let [image (ImageIO/read (File. (str "images/" (nth (nth map y) x))))]
         (.drawImage in-graphics image (* x 128) (* y 128) nil)))))
 
 (defn render [g in-panel]
