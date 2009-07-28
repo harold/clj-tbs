@@ -6,32 +6,15 @@
            [java.awt.image BufferedImage]))
 
 (load-file "map1.clj")
+(load-file "sprite.clj")
 
-(declare new-sprite)
 (defn build-map [in-map]
   (doseq [x (range 4)
           y (range 6)]
-    (let [the-sprite (new-sprite (str "images\\" (nth (nth in-map y) x)))]
-      (dosync (alter the-sprite assoc :x (- (* x 128) 192)
-                                      :y (- (* y 128) 320))))))
-
-(def g-sprites (ref []))
-
-(defn new-sprite [in-path]
-  (let [the-sprite (ref {:image (ImageIO/read (File. in-path))
-                         :x 0
-                         :y 0})]
-    (dosync (alter g-sprites conj the-sprite))
-    the-sprite))
-
-(defn render-sprites [in-graphics w h]
-  (doseq [the-sprite @g-sprites]
-    (let [the-image (:image @the-sprite)
-          the-sprite-half-width (/ (.getWidth the-image) 2)
-          the-sprite-half-height (/ (.getHeight the-image) 2)
-          x (int (+ (- (:x @the-sprite) the-sprite-half-width) (/ w 2)))
-          y (int (+ (- (:y @the-sprite) the-sprite-half-height) (/ h 2)))]
-      (.drawImage in-graphics (:image @the-sprite) x y nil))))
+    (let [the-sprite (sprite/new (str "images\\" (nth (nth in-map y) x)))]
+      (doto the-sprite
+        (sprite/set-x (- (* x 128) 192))
+        (sprite/set-y (- (* y 128) 320))))))
 
 (defn render [g in-panel]
   (let [w (.getWidth in-panel)
@@ -39,7 +22,8 @@
     (doto g
       (.setColor (Color. 60 60 60))
       (.fillRect 0 0 w h))
-    (render-sprites g w h)))
+      (.translate (/ w 2) (/ h 2))
+    (sprite/render-all g)))
 
 (defn main-panel []
   (let [the-return (proxy [JPanel] [] (paint [g] (render g this)))]
