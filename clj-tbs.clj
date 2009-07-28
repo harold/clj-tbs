@@ -1,9 +1,6 @@
 (ns clj-tbs
-  (:import [javax.imageio ImageIO]
-           [java.io File]
-           [javax.swing JFrame JPanel TransferHandler]
-           [java.awt Color Dimension]
-           [java.awt.image BufferedImage]))
+  (:import [javax.swing JFrame JPanel]
+           [java.awt Color Dimension]))
 
 (load-file "map1.clj")
 (load-file "sprite.clj")
@@ -21,8 +18,8 @@
         h (.getHeight in-panel)]
     (doto g
       (.setColor (Color. 60 60 60))
-      (.fillRect 0 0 w h))
-      (.translate (/ w 2) (/ h 2))
+      (.fillRect 0 0 w h)
+      (.translate (int (/ w 2)) (int (/ h 2))))
     (sprite/render-all g)))
 
 (defn main-panel []
