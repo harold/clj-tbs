@@ -7,6 +7,7 @@
 
 (load-file "map1.clj")
 
+(declare new-sprite)
 (defn build-map [in-map]
   (doseq [x (range 4)
           y (range 6)]
