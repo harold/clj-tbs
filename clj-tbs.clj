@@ -7,24 +7,38 @@
 
 (load-file "map1.clj")
 
-(defn render-board [in-graphics w h]
-  (let [map (map1/get-map)]
-    (doseq [x (range 4)
-            y (range 6)]
-      (let [image (ImageIO/read (File. (str "images/" (nth (nth map y) x))))]
-        (.drawImage in-graphics image (* x 128) (* y 128) nil)))))
+(defn build-map [in-map]
+  (doseq [x (range 4)
+          y (range 6)]
+    (let [the-sprite (new-sprite (str "images\\" (nth (nth in-map y) x)))]
+      (dosync (alter the-sprite assoc :x (- (* x 128) 192)
+                                      :y (- (* y 128) 320))))))
+
+(def g-sprites (ref []))
+
+(defn new-sprite [in-path]
+  (let [the-sprite (ref {:image (ImageIO/read (File. in-path))
+                         :x 0
+                         :y 0})]
+    (dosync (alter g-sprites conj the-sprite))
+    the-sprite))
+
+(defn render-sprites [in-graphics w h]
+  (doseq [the-sprite @g-sprites]
+    (let [the-image (:image @the-sprite)
+          the-sprite-half-width (/ (.getWidth the-image) 2)
+          the-sprite-half-height (/ (.getHeight the-image) 2)
+          x (int (+ (- (:x @the-sprite) the-sprite-half-width) (/ w 2)))
+          y (int (+ (- (:y @the-sprite) the-sprite-half-height) (/ h 2)))]
+      (.drawImage in-graphics (:image @the-sprite) x y nil))))
 
 (defn render [g in-panel]
   (let [w (.getWidth in-panel)
-        h (.getHeight in-panel)
-        the-image (new BufferedImage w h BufferedImage/TYPE_INT_ARGB)
-        the-graphics (.getGraphics the-image)]
-    (doto the-graphics
+        h (.getHeight in-panel)]
+    (doto g
       (.setColor (Color. 60 60 60))
       (.fillRect 0 0 w h))
-    (render-board the-graphics w h)
-    (.drawImage g the-image 0 0 nil)
-    (.dispose the-graphics)))
+    (render-sprites g w h)))
 
 (defn main-panel []
   (let [the-return (proxy [JPanel] [] (paint [g] (render g this)))]
@@ -34,6 +48,7 @@
 (defn go []
   (let [frame (JFrame. "clj-tbs")
         panel (main-panel)]
+    (build-map (map1/get-map))
     (doto frame (.add panel) .pack .show)))
 
 (go)
